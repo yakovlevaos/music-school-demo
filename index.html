@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Приложение музыкальной школы</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one column of sections; each section pairs a short explanation with a live phone (or panel) mock. Ends with the questionnaire. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#F7F8FB; --ink:#151A2C; --muted:#5A6378; --line:#DCE1EA;
+  --accent:#2A4FD6; --accent-ink:#FFFFFF; --accent-soft:#E5EBFD;
+  --brass:#A87A12; --brass-soft:#F7EDD2;
+  --ok:#1D8556; --ok-soft:#DFF3E8; --warn:#BF420B; --warn-soft:#FCE9DF;
+  --frame:#0D1018; --shadow:0 18px 50px -20px rgba(21,26,44,.35);
+  --display:"Unbounded","Manrope",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1220; --surface:#171C2D; --surface-2:#1C2236; --ink:#E7EAF3; --muted:#9AA3B9; --line:#2B3249;
+  --accent:#829BFF; --accent-ink:#0E1220; --accent-soft:#1E2850;
+  --brass:#E3B75A; --brass-soft:#372C12; --ok:#4FC48C; --ok-soft:#14301F; --warn:#FF9C66; --warn-soft:#3A2016;
+  --frame:#05070C; --shadow:0 18px 50px -20px rgba(0,0,0,.7); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E1220; --surface:#171C2D; --surface-2:#1C2236; --ink:#E7EAF3; --muted:#9AA3B9; --line:#2B3249;
+  --accent:#829BFF; --accent-ink:#0E1220; --accent-soft:#1E2850;
+  --brass:#E3B75A; --brass-soft:#372C12; --ok:#4FC48C; --ok-soft:#14301F; --warn:#FF9C66; --warn-soft:#3A2016;
+  --frame:#05070C; --shadow:0 18px 50px -20px rgba(0,0,0,.7); color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(28px,4.6vw,48px);letter-spacing:-.01em}
+h2{font-size:clamp(22px,3vw,30px)}
+h3{font-size:17px}
+p{margin:0}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+header.top{padding-block:40px 28px;display:grid;gap:18px}
+.staff-rule{height:22px;background:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 5px);opacity:.9}
+.lead{font-size:18px;max-width:62ch;color:var(--muted)}
+.lead b{color:var(--ink)}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px}
+nav.toc a{color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--brass);padding:4px 0 4px 12px;max-width:70ch}
+
+section.block{padding-block:48px;border-top:1px solid var(--line);display:grid;gap:28px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:start}
+.split > *{min-width:0}
+.explain{display:grid;gap:16px;max-width:520px}
+.feat{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.feat li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.feat button.show{all:unset;cursor:pointer;display:contents}
+.feat li.is-on{border-color:var(--accent);background:var(--accent-soft)}
+.feat .k{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.feat li.is-on .k{background:var(--accent);color:var(--accent-ink)}
+.feat b{display:block}
+.feat span.s{font-size:14px;color:var(--muted)}
+.feat li.clickable{cursor:pointer}
+
+/* phone */
+.phone{width:min(100%,360px);height:720px;border-radius:44px;background:var(--frame);padding:12px;box-shadow:var(--shadow);position:relative;justify-self:center}
+.screen{height:100%;border-radius:34px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.statusbar{display:flex;justify-content:space-between;padding:12px 24px 4px;font-size:12px;font-weight:700;color:var(--ink)}
+.scroll{flex:1;overflow-y:auto;padding:6px 16px 16px;display:grid;gap:12px;align-content:start;scrollbar-width:thin}
+.tabbar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding:6px 4px 14px}
+.tabbar button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:2px;font-size:11px;font-weight:600;padding:6px 0}
+.tabbar button[aria-selected="true"]{color:var(--accent)}
+.apphead{display:flex;justify-content:space-between;align-items:center;padding-top:4px}
+.apphead .logo{font-family:var(--display);font-size:15px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--surface);border-radius:18px;padding:14px;display:grid;gap:10px;border:1px solid var(--line)}
+.card.hero{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.card.hero .sub{opacity:.8;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.big{font-family:var(--display);font-size:30px;line-height:1}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:700}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.brass{background:var(--brass-soft);color:var(--brass)}
+.card.hero .pill.warn{background:var(--accent-ink);color:var(--warn)}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:700;font-size:14px;background:var(--accent);color:var(--accent-ink)}
+.btn.light{background:var(--accent-ink);color:var(--accent)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn.brass{background:var(--brass);color:var(--surface)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.full{width:100%}
+.small{font-size:13px}
+.tiny{font-size:12px}
+.staffsvg{width:100%;height:auto;display:block}
+.list{display:grid;gap:0}
+.list .li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list .li:last-child{border-bottom:0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;border-radius:9px;padding:7px 4px;font-size:13px;font-weight:700;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;display:grid;gap:6px;align-content:start}
+.item .pic{aspect-ratio:4/3;max-width:100%;border-radius:10px;background:var(--brass-soft);color:var(--brass);display:grid;place-items:center}
+.item .t{font-size:13px;font-weight:700;line-height:1.25;min-height:2.5em}
+.item .p{font-size:13px;font-weight:800;color:var(--brass)}
+.item .btn{padding:7px 8px;font-size:12px}
+.confirm{display:flex;gap:4px}
+.confirm .btn{flex:1}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.day{display:grid;justify-items:center;gap:2px;font-size:11px;color:var(--muted);padding:6px 0;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.day b{font-size:14px;color:var(--ink)}
+.day.has{border-color:var(--accent)}
+.day.has i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.day.today{background:var(--accent);border-color:var(--accent)}
+.day.today b,.day.today{color:var(--accent-ink)}
+.day.today i{background:var(--accent-ink)}
+.lesson{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
+.lesson .tm{font-weight:800;font-size:14px}
+.wk{display:flex;gap:3px}
+.wk span{width:24px;height:22px;border-radius:6px;font-size:10px;font-weight:700;display:grid;place-items:center;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.wk span.on{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.tariff{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px;color:var(--ink)}
+.tariff[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.toggle{display:flex;gap:10px;align-items:center;font-size:14px}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.gw{position:absolute;inset:0;background:var(--surface);display:flex;flex-direction:column;z-index:5}
+.gw .bar{padding:44px 18px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.gw .body{padding:18px;display:grid;gap:12px;align-content:start;flex:1;overflow-y:auto}
+.gw .demo{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
+.done-ico{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;justify-self:center}
+
+/* teacher */
+.tl{display:grid;gap:8px}
+.tl .card{gap:8px}
+.mark{display:flex;gap:6px}
+.mark .btn{flex:1;padding:8px}
+.btn.okb{background:var(--ok);color:var(--surface)}
+.linked{font-size:13px;padding:10px 12px;border-radius:12px;background:var(--brass-soft);color:var(--ink)}
+
+/* admin */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;width:100%}
+.panel .ph{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.panel .dots{display:flex;gap:6px}.panel .dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.panel .pb{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0}
+.panel .pcol{padding:18px;display:grid;gap:14px;align-content:start;min-width:0}
+.panel .pcol + .pcol{border-left:1px solid var(--line)}
+.form-row{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:8px}
+input[type=text],input[type=number],textarea,select{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+textarea{min-height:70px;resize:vertical}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tblwrap{overflow-x:auto}
+.wishes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.wish{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:6px;align-content:start}
+.wish b{font-size:16px}
+.wish p{font-size:14px;color:var(--muted)}
+.lnk{all:unset;cursor:pointer;color:var(--accent);font-weight:700;font-size:14px;margin-top:4px}
+.lnk:hover{text-decoration:underline}
+.lnk:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.clarify{display:grid;gap:8px;padding:20px;border-radius:16px;background:var(--brass-soft);max-width:760px}
+.clarify p{font-size:15px}
+@media (max-width:900px){.wishes{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.wishes{grid-template-columns:1fr}}
+.cmp{min-width:640px;background:var(--surface);border:1px solid var(--line);border-radius:16px;border-collapse:separate;border-spacing:0;overflow:hidden}
+.cmp th,.cmp td{padding:12px 14px;vertical-align:top}
+.cmp th{font-size:13px;color:var(--ink);background:var(--surface-2)}
+.cmp td:last-child,.cmp th:last-child{background:var(--accent-soft)}
+.cmp tr:last-child td{border-bottom:0}
+.x{background:none;border:0;color:var(--muted);font-size:18px;line-height:1;padding:2px 6px}
+
+/* payment flow */
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;counter-reset:st}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:6px;align-content:start;position:relative}
+.step .n{font-family:var(--display);font-size:13px;color:var(--accent)}
+.step b{font-size:15px}
+.step p{font-size:14px;color:var(--muted)}
+.need{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.need div{padding:14px 16px;border-radius:14px;border:1px dashed var(--line);background:var(--surface)}
+.need b{display:block;margin-bottom:2px}
+.need p{font-size:14px;color:var(--muted)}
+
+/* questionnaire */
+.q-intro{display:grid;gap:10px;max-width:70ch}
+.qgroup{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:18px}
+.qgroup > header{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.qgroup > header .n{font-family:var(--display);font-size:14px;color:var(--brass)}
+.qgroup .why{font-size:14px;color:var(--muted);flex-basis:100%}
+.q{display:grid;gap:8px}
+.q > label,.q > .lbl{font-weight:700;font-size:15px}
+.q .hint{font-size:13px;color:var(--muted);margin-top:-4px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opts label{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer;background:var(--surface-2)}
+.opts input{accent-color:var(--accent);margin:0}
+.opts label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 24px}
+.qgrid .wide{grid-column:1/-1}
+.q textarea.other{min-height:44px;font-size:14px}
+.q.key{padding:16px;border-radius:14px;background:var(--brass-soft)}
+.q.key > label{font-size:17px}
+.qbar{position:sticky;bottom:0;margin-top:8px;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 0 0;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 -8px 24px -12px rgba(0,0,0,.2)}
+.progress{flex:1;min-width:160px;display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.progress .trk{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.progress .trk i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+#copyOut{width:100%;min-height:200px;font-size:13px}
+footer{padding-block:40px 60px;color:var(--muted);font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:900px){
+  .split{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr 1fr}
+  .panel .pb{grid-template-columns:1fr}
+  .panel .pcol + .pcol{border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:560px){
+  .qgrid{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr 1fr}
+  .form-row .btn{grid-column:1/-1}
+  .phone{height:680px;padding:8px;border-radius:38px}
+  .screen{border-radius:30px}
+  .qgroup{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Предложение и анкета</div>
+  <h1>Приложение для&nbsp;вашей музыкальной школы</h1>
+  <div class="staff-rule" aria-hidden="true"></div>
+  <p class="lead">Спасибо за запрос! На этой странице: <b>что мы поняли</b> из вашего сообщения, <b>как может выглядеть приложение</b> и <b>анкета</b>. Её ответы помогут нам точно понять, что вам нужно, и назвать сроки и стоимость.</p>
+  <p class="note">Демо-экраны можно нажимать. Название «Камертон», имена и цены выдуманы. В настоящем приложении будут логотип, цвета, педагоги и цены вашей школы.</p>
+  <nav class="toc" aria-label="Разделы">
+    <a href="#understood">Что мы поняли</a><a href="#web">Что такое веб-приложение</a><a href="#parent">Родитель</a><a href="#teacher">Педагог</a><a href="#admin">Администратор</a><a href="#payment">Как устроена оплата</a><a href="#form">Анкета</a>
+  </nav>
+</header>
+
+<section class="block" id="understood">
+  <div class="explain" style="max-width:70ch">
+    <div class="eyebrow">Ваш запрос</div>
+    <h2>Что мы поняли из вашего сообщения</h2>
+    <p class="muted">Вы хотите приложение для родителей и учеников вашей школы. Вот что, как мы поняли, в нём должно быть:</p>
+  </div>
+  <div class="wishes">
+    <div class="wish"><b>Абонементы</b><p>Родители видят, сколько занятий осталось и до какого числа нужно оплатить абонемент.</p><button class="lnk" data-demo="home">Посмотреть в демо →</button></div>
+    <div class="wish"><b>Оплата по ссылке</b><p>Оплатить обучение можно прямо там же, по ссылке, без перевода на карту.</p><button class="lnk" data-demo="pay">Посмотреть в демо →</button></div>
+    <div class="wish"><b>Накопительные бонусы</b><p>Наглядно видно, сколько бонусов накоплено и на что их можно потратить.</p><button class="lnk" data-demo="bonus">Посмотреть в демо →</button></div>
+    <div class="wish"><b>Магазин за бонусы</b><p>Список товаров вы обновляете сами, прямо в приложении.</p><a class="lnk" href="#admin">Посмотреть в демо →</a></div>
+    <div class="wish"><b>Расписание педагогов</b><p>Родители видят, в какие дни педагог бывает в школе.</p><button class="lnk" data-demo="sched">Посмотреть в демо →</button></div>
+    <div class="wish"><b>На телефоне и компьютере</b><p>Одно веб-приложение, которое работает на любом телефоне и на компьютере.</p><a class="lnk" href="#web">Почему веб →</a></div>
+  </div>
+  <div class="clarify">
+    <b>Что нам нужно уточнить</b>
+    <p>Сколько у вас учеников и педагогов, как сейчас устроены бонусы, через что вы принимаете оплату, что важнее всего запустить в первую очередь и какой бюджет у школы на приложение. Об этом анкета в конце страницы.</p>
+    <a class="btn" href="#form" style="justify-self:start;text-decoration:none">Перейти к анкете</a>
+  </div>
+</section>
+
+<section class="block" id="web">
+  <div class="explain" style="max-width:70ch">
+    <div class="eyebrow">Формат</div>
+    <h2>Мы делаем веб-приложение, и это даже удобнее</h2>
+  </div>
+  <div class="clarify" style="background:var(--accent-soft)">
+    <b>Сразу о главном</b>
+    <p>Мы не разрабатываем приложения для Android и iOS, которые публикуются в Google Play и App Store. Мы делаем <b>веб-приложения</b>. Его открывают по ссылке, а на телефоне один раз добавляют на главный экран. После этого у родителя появляется иконка школы, и приложение открывается на весь экран, как обычное.</p>
+  </div>
+  <h3>Почему для школы это даже лучше</h3>
+  <div class="need">
+    <div><b>Одно приложение для всех</b><p>iPhone, Android, планшет и компьютер. Родители, педагоги и администратор пользуются одним и тем же приложением.</p></div>
+    <div><b>Не нужно искать и скачивать</b><p>Родитель переходит по ссылке из чата или сканирует QR-код на стойке и сразу попадает в приложение. Никто не «теряется» на этапе установки.</p></div>
+    <div><b>Изменения видны сразу</b><p>Новый товар в магазине, новая цена, новое расписание или исправление сразу появляются у всех. Не нужно ждать проверки магазина и уговаривать родителей обновиться.</p></div>
+    <div><b>Не зависит от магазинов приложений</b><p>Российским компаниям сейчас сложно публиковаться в App Store: трудно оплатить аккаунт разработчика, приложения могут удалить. Веб-приложение работает на вашем адресе, его никто не уберёт.</p></div>
+    <div><b>Дешевле и быстрее</b><p>Мы делаем и поддерживаем одно приложение вместо трёх. Нет ежегодной платы магазинам за аккаунт разработчика.</p></div>
+    <div><b>Не занимает память телефона</b><p>Ничего не скачивается, место на телефоне не тратится. Работает даже на старых моделях.</p></div>
+  </div>
+  <h3>Что важно знать</h3>
+  <ul class="feat">
+    <li><span class="k">i</span><span><b>Уведомления на iPhone</b><span class="s">приходят, если приложение добавлено на главный экран. Поэтому важные напоминания мы дополнительно дублируем в Telegram.</span></span></li>
+    <li><span class="k">i</span><span><b>Нужен интернет</b><span class="s">Для абонементов, оплаты и бонусов он нужен в любом случае: данные всегда должны быть актуальными.</span></span></li>
+  </ul>
+  <div class="need">
+    <div><b>Установка на iPhone</b><p>Открыть ссылку в Safari → кнопка «Поделиться» → «На экран „Домой“».</p></div>
+    <div><b>Установка на Android</b><p>Открыть ссылку в Chrome → браузер сам предложит «Установить приложение» или в меню ⋮ → «Добавить на главный экран».</p></div>
+  </div>
+</section>
+
+<section class="block" id="parent">
+  <div class="split">
+    <div class="explain">
+      <div class="eyebrow">Экран родителя</div>
+      <h2>Всё про занятия ребёнка в одном месте</h2>
+      <p class="muted">Нажимайте на пункты ниже или на вкладки внизу телефона.</p>
+      <ul class="feat" id="featList"></ul>
+      <p class="note">Если в семье двое детей, переключение сверху: «Маша» и «Петя». У каждого свой абонемент и расписание.</p>
+    </div>
+    <div class="phone" aria-label="Демо: приложение родителя">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="scroll" id="pScroll"></div>
+        <nav class="tabbar" id="pTabs" role="tablist"></nav>
+        <div class="gw" id="gw" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="teacher">
+  <div class="split">
+    <div class="explain">
+      <div class="eyebrow">Экран педагога</div>
+      <h2>Педагог отмечает урок, и остаток у родителя меняется сразу</h2>
+      <p class="muted">Здесь педагог видит свои уроки на сегодня. Одна кнопка на ученика: «Был» или «Пропуск». Абонемент списывается автоматически, бонусы за посещение начисляются тоже автоматически.</p>
+      <p class="linked">Попробуйте: нажмите «Был» у Маши Соколовой, потом посмотрите вкладку «Главная» в телефоне родителя выше. Занятий станет на одно меньше, бонусов на 20 больше.</p>
+      <p class="note">Правило пропусков (переносить занятие или списывать) школа задаёт сама. Это один из вопросов анкеты.</p>
+    </div>
+    <div class="phone" aria-label="Демо: приложение педагога">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="scroll" id="tScroll"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="admin">
+  <div class="explain" style="max-width:70ch">
+    <div class="eyebrow">Панель администратора</div>
+    <h2>Магазин бонусов и подтверждение оплат</h2>
+    <p class="muted">Администратор работает с компьютера. Товары за бонусы добавляются за пару секунд и сразу появляются у родителей. Добавьте товар здесь и откройте вкладку «Бонусы» в телефоне выше. Справа — оплаты, которые нужно подтвердить.</p>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="dots"><i></i><i></i><i></i></div><b class="small">Камертон · администратор</b></div>
+    <div class="pb">
+      <div class="pcol">
+        <h3>Магазин бонусов</h3>
+        <form id="addForm" class="form-row" autocomplete="off">
+          <input type="text" id="newName" placeholder="Название товара" aria-label="Название товара" required maxlength="40">
+          <input type="number" id="newPrice" placeholder="Бонусы" aria-label="Цена в бонусах" min="10" step="10" required>
+          <button class="btn" type="submit">Добавить</button>
+        </form>
+        <div class="tblwrap"><table class="tbl"><thead><tr><th>Товар</th><th class="num">Цена</th><th>Заявки</th><th></th></tr></thead><tbody id="shopTbl"></tbody></table></div>
+      </div>
+      <div class="pcol">
+        <h3>Оплаты на подтверждение</h3>
+        <div class="tblwrap"><table class="tbl"><thead><tr><th>Ученик</th><th>Абонемент</th><th></th></tr></thead><tbody id="payTbl"></tbody></table></div>
+        <p class="tiny muted">Администратор сверяет оплату с кабинетом платёжного сервиса школы и нажимает «Оплачено».</p>
+        <h3>Абонементы заканчиваются</h3>
+        <div class="tblwrap"><table class="tbl"><thead><tr><th>Ученик</th><th>Осталось</th><th></th></tr></thead><tbody id="expTbl"></tbody></table></div>
+        <p class="tiny muted">Напоминание уходит родителю в приложение или Telegram и содержит ссылку на оплату. Можно отправлять вручную или автоматически, например за 2 занятия до конца абонемента.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="payment">
+  <div class="explain" style="max-width:70ch">
+    <div class="eyebrow">Оплата</div>
+    <h2>Деньги идут напрямую школе. Приложение только даёт ссылку</h2>
+    <p class="muted">Школа подключает свой платёжный сервис: Робокассу, ЮKassa, Т-Кассу или платёжные ссылки СБП своего банка. Приложение не принимает деньги, не видит данные карт и не формирует чеки. Оно только открывает родителю страницу оплаты школы.</p>
+  </div>
+  <div class="flow flow4">
+    <div class="step"><span class="n">1</span><b>Ссылки на оплату</b><p>Школа создаёт в своём платёжном сервисе ссылки на каждый абонемент. Администратор вставляет их в приложение.</p></div>
+    <div class="step"><span class="n">2</span><b>Родитель платит</b><p>Нажимает «Оплатить» и попадает на страницу платёжного сервиса школы. Платит по СБП или картой.</p></div>
+    <div class="step"><span class="n">3</span><b>Чек</b><p>Чек родителю присылает платёжный сервис. Деньги поступают на счёт школы.</p></div>
+    <div class="step"><span class="n">4</span><b>Администратор подтверждает</b><p>Видит оплату в кабинете сервиса и нажимает в приложении «Оплачено». Занятия добавляются, родитель получает уведомление.</p></div>
+  </div>
+  <div class="need">
+    <div><b>Что делает приложение</b><p>Показывает ссылку на оплату, напоминает об оплате, после подтверждения администратором показывает новый остаток занятий.</p></div>
+    <div><b>Чего приложение не делает</b><p>Не принимает и не переводит деньги, не хранит данные карт и платёжные данные, не выдаёт чеки.</p></div>
+    <div><b>Что остаётся на стороне школы</b><p>Договор с платёжным сервисом, онлайн-касса и чеки, оферта и правила возврата, правила бонусной программы.</p></div>
+  </div>
+  <p class="note">Подтверждение оплаты вручную занимает у администратора несколько минут в день. Зато приложение никак не связано с деньгами школы.</p>
+</section>
+
+<section class="block" id="form">
+  <div class="q-intro">
+    <div class="eyebrow">Анкета</div>
+    <h2>Анкета: что вам нужно от приложения</h2>
+    <p class="muted">Отвечайте своими словами и так подробно, как вам удобно. Можно пропускать вопросы или писать «не знаю» и «обсудим». Ответы сохраняются в этом браузере, к анкете можно вернуться позже. Когда закончите, нажмите <b>«Отправить в MAX»</b> внизу: откроется MAX с готовым текстом ответов, выберите наш чат и отправьте. Если MAX не открылся, нажмите «Скопировать ответы» и вставьте текст в любой мессенджер.</p>
+  </div>
+  <form id="qForm" autocomplete="off"></form>
+  <div class="qbar">
+    <div class="progress"><span id="progTxt">Заполнено 0 из 0</span><div class="trk"><i id="progBar"></i></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" type="button" id="clearBtn">Очистить</button>
+      <button class="btn ghost" type="button" id="copyBtn">Скопировать ответы</button>
+      <a class="btn" id="maxBtn" href="https://max.ru/:share?text=" target="_blank" rel="noopener" style="text-decoration:none">Отправить в MAX</a>
+    </div>
+  </div>
+  <div id="copyWrap" hidden style="display:grid;gap:8px">
+    <p class="small muted">Не получилось скопировать автоматически. Выделите текст ниже и скопируйте вручную.</p>
+    <textarea id="copyOut" readonly></textarea>
+  </div>
+</section>
+
+<footer>Демо-прототип. Имена, цены и данные выдуманы и служат только для примера.</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>n.toLocaleString('ru-RU');
+let toastT;function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2600)}
+
+const I={
+ home:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+ cal:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ star:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>',
+ card:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg>',
+ check:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ note:'<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18.5a3 2.3 -20 1 1-1.2-2.1V4l11-2v13.5a3 2.3 -20 1 1-1.2-2.1V6.3L9 7.9z"/></svg>',
+ shirt:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3c0 2-1.5 3-4 3S8 5 8 3z"/></svg>',
+ book:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 10.5h8M8 13h8M8 15.5h8"/></svg>',
+ metro:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M9 3h6l4 18H5z"/><path d="M12 17l5-10"/><path d="M7 15h10"/></svg>',
+ clock:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ mic:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>',
+ gift:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5"/><path d="M5 13v8h14v-8M12 8v13M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></svg>'
+};
+
+const S={
+ kid:'masha', tab:'home', bonusView:'shop', pay:{tariff:8,step:null}, pendingPay:[{who:'Илья Громов',n:8,sum:6400,date:'вчера'},{who:'Вера Ким',n:4,sum:3400,date:'сегодня'}],
+ kids:{
+  masha:{name:'Маша',full:'Маша Соколова',subj:'Фортепиано',teacher:'Лебедева Анна Викторовна',total:8,used:5,until:'28 ноября',next:'Чт, 5 ноября, 15:00',room:'Кабинет 3',lessons:{0:'15:00 Фортепиано',3:'15:00 Фортепиано',5:'11:00 Сольфеджио (группа)'}},
+  petya:{name:'Петя',full:'Петя Соколов',subj:'Гитара',teacher:'Орлов Денис Игоревич',total:4,used:1,until:'3 декабря',next:'Сб, 7 ноября, 12:00',room:'Кабинет 1',lessons:{1:'17:30 Гитара',5:'12:00 Гитара'}}
+ },
+ bonus:1240,
+ history:[['Посещение урока','+20'],['Посещение урока','+20'],['Месяц без пропусков','+100'],['Обмен: тетрадь для нот','−200']],
+ shop:[
+  {id:1,t:'Тетрадь для нот',p:200,ic:'book',orders:3},
+  {id:2,t:'Футболка школы',p:900,ic:'shirt',orders:1},
+  {id:3,t:'Метроном',p:1500,ic:'metro',orders:0},
+  {id:4,t:'Набор наклеек «Ноты»',p:120,ic:'note',orders:2},
+  {id:5,t:'Брелок «Скрипичный ключ»',p:300,ic:'gift',orders:0},
+  {id:6,t:'Значок со скрипичным ключом',p:150,ic:'note',orders:5}
+ ],
+ confirm:null, orders:[],
+ tariffs:[[4,3400],[8,6400],[12,9000]],
+ teacher:[
+  {time:'15:00',who:'Маша Соколова',kid:'masha',st:null},
+  {time:'15:45',who:'Илья Громов',rem:6,st:null},
+  {time:'16:30',who:'Вера Ким',rem:1,st:null},
+  {time:'17:15',who:'Тимур Абдуллаев',rem:9,st:null}
+ ],
+ expiring:[{who:'Вера Ким',rem:1,sent:false},{who:'Маша Соколова',kid:'masha',sent:false},{who:'Лев Мартынов',rem:2,sent:false}]
+};
+const K=()=>S.kids[S.kid];
+const rem=k=>k.total-k.used;
+
+/* staff with note heads: filled = attended, hollow = remaining */
+function staff(k){
+ const n=k.total, w=300, h=78, top=14, gap=9, x0=34, step=(w-x0-14)/Math.max(n,1);
+ const ink='currentColor';
+ let s=`<svg class="staffsvg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Использовано ${k.used} из ${n} занятий">`;
+ for(let i=0;i<5;i++) s+=`<line x1="4" x2="${w-4}" y1="${top+i*gap}" y2="${top+i*gap}" stroke="${ink}" stroke-opacity=".45" stroke-width="1"/>`;
+ s+=`<text x="6" y="${top+4*gap+4}" font-size="44" fill="${ink}" fill-opacity=".9" font-family="serif">𝄞</text>`;
+ for(let i=0;i<n;i++){
+  const pos=(i%8); const y=top+4*gap+gap - pos*(gap/2) - 4; const x=x0+step*(i+.5);
+  const used=i<k.used;
+  s+=`<g><ellipse cx="${x}" cy="${y}" rx="5.4" ry="4" transform="rotate(-20 ${x} ${y})" fill="${used?ink:'none'}" stroke="${ink}" stroke-width="1.6"/><line x1="${x+5}" x2="${x+5}" y1="${y}" y2="${y-24}" stroke="${ink}" stroke-width="1.4"/></g>`;
+ }
+ return s+'</svg>';
+}
+
+const tabs=[['home','Главная',I.home],['sched','Расписание',I.cal],['bonus','Бонусы',I.star],['pay','Оплата',I.card]];
+const feats=[
+ ['home','Сколько занятий осталось','Остаток абонемента и срок действия. Когда занятий мало, появляется предупреждение.',I.home],
+ ['pay','Оплата по ссылке','Выбрать абонемент и перейти на страницу оплаты школы: СБП или карта.',I.card],
+ ['bonus','Бонусы и магазин','Баланс, история начислений и товары, которые можно получить за бонусы.',I.star],
+ ['sched','Расписание','Уроки ребёнка на неделю и дни, когда каждый педагог в школе.',I.cal]
+];
+
+function renderFeats(){
+ $('#featList').innerHTML=feats.map(f=>`<li class="clickable ${S.tab===f[0]?'is-on':''}" data-tab="${f[0]}" tabindex="0" role="button" aria-pressed="${S.tab===f[0]}"><span class="k">${f[3]}</span><span><b>${f[1]}</b><span class="s">${f[2]}</span></span></li>`).join('');
+}
+function renderTabs(){
+ $('#pTabs').innerHTML=tabs.map(t=>`<button role="tab" aria-selected="${S.tab===t[0]}" data-tab="${t[0]}">${t[2]}<span>${t[1]}</span></button>`).join('');
+}
+function kidChips(){
+ return `<div class="chips">${Object.entries(S.kids).map(([id,k])=>`<button class="chip" data-kid="${id}" aria-pressed="${S.kid===id}">${k.name}</button>`).join('')}</div>`;
+}
+function head(title){return `<div class="apphead"><span class="logo">${title}</span><span class="avatar">ОС</span></div>`}
+
+function vHome(){
+ const k=K(), r=rem(k);
+ const warn=r<=3?`<span class="pill warn">${r===0?'Абонемент закончился':'Скоро закончится'}</span>`:`<span class="pill ok">Активен</span>`;
+ return head('Камертон')+kidChips()+`
+ <div class="card hero">
+  <div class="row"><span class="sub">${k.subj} · абонемент на ${k.total} занятий</span>${warn}</div>
+  <div class="row" style="align-items:flex-end"><div><div class="big num">${r}</div><div class="sub">${r===1?'занятие осталось':'занятий осталось'}</div></div><div class="sub" style="text-align:right">действует<br>до ${k.until}</div></div>
+  ${staff(k)}
+  <div class="tiny sub">Закрашенная нота — проведённое занятие</div>
+  <button class="btn light full" data-go="pay">Продлить абонемент</button>
+ </div>
+ ${k.pending?`<div class="card" style="background:var(--brass-soft);border-color:transparent"><b class="small">Оплата на проверке</b><span class="small">Скоро администратор подтвердит оплату, и занятия добавятся.</span></div>`:''}
+ <div class="card">
+  <div class="row"><b class="small">Следующее занятие</b><span class="tiny muted">${k.room}</span></div>
+  <div><b>${k.next}</b><div class="small muted">${k.teacher}</div></div>
+ </div>
+ <button class="card" data-go="bonus" style="text-align:left;color:var(--ink);font:inherit">
+  <div class="row"><span><span class="tiny muted">Бонусы семьи</span><div class="big num" style="font-size:24px;color:var(--brass)">${fmt(S.bonus)}</div></span><span class="pill brass">В магазин →</span></div>
+ </button>
+ <div class="card">
+  <span class="pill brass" style="justify-self:start">Объявление</span>
+  <b>Отчётный концерт 20 декабря</b>
+  <span class="small muted">Большой зал, 18:00.</span>
+ </div>`;
+}
+
+function vSched(){
+ const k=K(); const dn=['Пн','Вт','Ср','Чт','Пт','Сб','Вс']; const dd=[2,3,4,5,6,7,8];
+ const days=dn.map((d,i)=>`<div class="day ${k.lessons[i]!==undefined?'has':''} ${i===3?'today':''}"><span>${d}</span><b class="num">${dd[i]}</b><i></i></div>`).join('');
+ const ls=Object.entries(k.lessons).map(([i,t])=>{const [tm,...rest]=t.split(' ');return `<div class="lesson"><span class="tm num">${tm}</span><span><b class="small">${dn[i]}, ${dd[i]} ноября · ${rest.join(' ')}</b><div class="tiny muted">${rest.join(' ').includes('Сольф')?'Ковалёва Ирина Павловна':k.teacher}</div></span></div>`}).join('');
+ const T=[['Лебедева А. В.','Фортепиано',[1,0,1,1,1,0,0],'14:00–20:00'],['Орлов Д. И.','Гитара',[0,1,0,1,0,1,0],'15:00–21:00'],['Ковалёва И. П.','Сольфеджио, хор',[0,0,1,0,0,1,0],'10:00–15:00'],['Минаев С. А.','Ударные',[1,0,0,0,1,1,0],'16:00–21:00']];
+ const tt=T.map(t=>`<div class="li" style="flex-direction:column;gap:6px"><div class="row"><span><b>${t[0]}</b> <span class="muted tiny">${t[1]}</span></span><span class="tiny muted num">${t[3]}</span></div><div class="wk">${t[2].map((on,i)=>`<span class="${on?'on':''}">${dn[i]}</span>`).join('')}</div></div>`).join('');
+ return head('Расписание')+kidChips()+`
+ <div class="card"><b class="small">Неделя 2–8 ноября</b><div class="days">${days}</div>${ls}</div>
+ <div class="card"><b class="small">Когда педагоги в школе</b><div class="list">${tt}</div></div>
+ <div class="tiny muted" style="padding:0 4px">Если урок переносится или отменяется, родитель получает уведомление.</div>`;
+}
+
+function vBonus(){
+ const seg=[['shop','Магазин'],['hist','История'],['how','Как получить']].map(s=>`<button data-bv="${s[0]}" aria-selected="${S.bonusView===s[0]}">${s[1]}</button>`).join('');
+ let body='';
+ if(S.bonusView==='shop'){
+  body=`<div class="shop">${S.shop.map(it=>{
+   const can=S.bonus>=it.p;
+   const act=S.confirm===it.id?`<div class="confirm"><button class="btn brass" data-buy="${it.id}">Да</button><button class="btn ghost" data-cancel>Нет</button></div>`
+     :`<button class="btn ${can?'brass':'ghost'}" data-ask="${it.id}" ${can?'':'disabled'}>${can?'Обменять':'Не хватает'}</button>`;
+   return `<div class="item"><div class="pic">${I[it.ic]||I.gift}</div><div class="t">${esc(it.t)}</div><div class="p num">${fmt(it.p)} б.</div>${act}</div>`}).join('')}</div>`;
+  if(S.orders.length) body=`<div class="card" style="background:var(--ok-soft);border-color:transparent"><b class="small">Ваши заявки</b>${S.orders.map(o=>`<div class="small">${esc(o)}: заберите у администратора</div>`).join('')}</div>`+body;
+ } else if(S.bonusView==='hist'){
+  body=`<div class="card"><div class="list">${S.history.map(h=>`<div class="li"><span>${esc(h[0])}</span><b class="num" style="color:${h[1][0]==='+'?'var(--ok)':'var(--muted)'};white-space:nowrap">${h[1]}</b></div>`).join('')}</div></div>`;
+ } else {
+  body=`<div class="card"><div class="list">
+   <div class="li"><span>Посещение урока</span><b>+20</b></div>
+   <div class="li"><span>Месяц без пропусков</span><b>+100</b></div>
+</div>
+   <div class="tiny muted">Бонусы начисляются за посещения и обмениваются на приятные мелочи из магазина. Оплатить ими абонемент нельзя. Условия — пример, школа задаёт свои.</div></div>`;
+ }
+ return head('Бонусы')+`
+ <div class="card" style="background:var(--brass-soft);border-color:transparent">
+  <span class="tiny" style="color:var(--brass);font-weight:700">Баланс семьи</span>
+  <div class="big num" style="color:var(--brass)">${fmt(S.bonus)} <span style="font-size:16px">бонусов</span></div>
+ </div>
+ <div class="seg" role="tablist">${seg}</div>${body}`;
+}
+
+function vPay(){
+ const k=K(); const tr=S.tariffs.find(t=>t[0]===S.pay.tariff);
+ return head('Оплата')+kidChips()+`
+ ${k.pending?`<div class="card" style="background:var(--brass-soft);border-color:transparent"><b class="small">Оплата на проверке</b><span class="small">Администратор подтвердит оплату, и занятия появятся в приложении.</span></div>`:''}
+ <div class="small muted">${k.full} · ${k.subj}. Новые занятия добавятся к ${rem(k)} оставшимся.</div>
+ <div role="radiogroup" aria-label="Абонемент" style="display:grid;gap:8px">${S.tariffs.map(t=>`<button class="tariff" role="radio" aria-checked="${S.pay.tariff===t[0]}" data-tariff="${t[0]}"><span><b>${t[0]} занятий</b><div class="tiny muted">${fmt(Math.round(t[1]/t[0]))} ₽ за урок · 45 мин</div></span><b class="num">${fmt(t[1])} ₽</b></button>`).join('')}</div>
+ <div class="card">
+  <div class="row"><b>К оплате</b><b class="num">${fmt(tr[1])} ₽</b></div>
+  <button class="btn full" data-paygo>Перейти к оплате</button>
+  <div class="tiny muted">Откроется страница оплаты школы. Приложение не видит данные карты и не принимает деньги.</div>
+ </div>
+ <div class="card"><b class="small">История оплат</b><div class="list"><div class="li"><span>8 октября · 8 занятий</span><span class="num">6 400 ₽</span></div><div class="li"><span>9 сентября · 8 занятий</span><span class="num">6 400 ₽</span></div></div></div>`;
+}
+
+function renderGW(){
+ const g=$('#gw'); if(!S.pay.step){g.hidden=true;g.innerHTML='';return}
+ const tr=S.tariffs.find(t=>t[0]===S.pay.tariff); const sum=tr[1];
+ g.hidden=false;
+ if(S.pay.step==='gw'){
+  g.innerHTML=`<div class="bar"><b>Оплата · платёжный сервис школы</b><button class="x" data-gwclose aria-label="Закрыть">×</button></div>
+  <div class="body"><span class="demo">Демо: это уже сайт платёжного сервиса, не приложение</span>
+   <div class="small muted">Получатель: ИП «Камертон»<br>Абонемент ${tr[0]} занятий, ${esc(K().full)}</div>
+   <div class="big num">${fmt(sum)} ₽</div>
+   <button class="btn full" data-gwpay>Оплатить через СБП</button>
+   <button class="btn ghost full" data-gwpay>Банковская карта</button>
+   <p class="tiny muted">Данные карты вводятся только на странице платёжного сервиса. Приложение их не видит и не хранит. Чек пришлёт платёжный сервис.</p></div>`;
+ } else {
+  const k=K();
+  g.innerHTML=`<div class="bar"><b>Готово</b><button class="x" data-gwclose aria-label="Закрыть">×</button></div>
+  <div class="body" style="text-align:center"><div class="done-ico">${I.check}</div><h3>Оплата прошла</h3>
+   <p class="small muted">Чек пришлёт платёжный сервис. Администратор школы подтвердит оплату, и новые занятия появятся в приложении. Попробуйте подтвердить её сами в панели администратора ниже.</p>
+   <button class="btn full" data-gwclose>Вернуться в приложение</button></div>`;
+ }
+}
+
+function renderParent(){
+ const v={home:vHome,sched:vSched,bonus:vBonus,pay:vPay}[S.tab]();
+ const sc=$('#pScroll'); sc.innerHTML=v; renderTabs(); renderFeats(); renderGW();
+}
+
+function renderTeacher(){
+ const rows=S.teacher.map((l,i)=>{
+  const r=l.kid?rem(S.kids[l.kid]):l.rem;
+  const st=l.st==='came'?'<span class="pill ok">Был · списано</span>':l.st==='skip'?'<span class="pill warn">Пропуск · перенос</span>':'';
+  return `<div class="card"><div class="row"><span><b class="num">${l.time}</b> · ${esc(l.who)}</span>${st}</div>
+   <div class="tiny muted">В абонементе осталось: <b class="num">${r}</b></div>
+   ${l.st?`<button class="btn ghost" data-undo="${i}" style="padding:7px">Отменить отметку</button>`:`<div class="mark"><button class="btn okb" data-came="${i}" ${r<=0?'disabled':''}>Был</button><button class="btn ghost" data-skip="${i}">Пропуск</button></div>`}</div>`;
+ }).join('');
+ $('#tScroll').innerHTML=`<div class="apphead"><span class="logo">Мои уроки</span><span class="avatar">АЛ</span></div>
+  <div><b>Четверг, 5 ноября</b><div class="small muted">Лебедева А. В. · Кабинет 3</div></div>
+  <div class="tl">${rows}</div>
+  <div class="card"><b class="small">Мои дни в школе</b><div class="small muted">Пн, Ср, Чт, Пт · 14:00–20:00</div></div>`;
+}
+
+function renderAdmin(){
+ $('#payTbl').innerHTML=S.pendingPay.length?S.pendingPay.map((p,i)=>`<tr><td>${esc(p.who)}<div class="tiny muted">${p.date}</div></td><td class="num">${p.n} зан. · ${fmt(p.sum)} ₽</td><td><button class="btn okb" style="padding:6px 10px;font-size:13px" data-confirm="${i}">Оплачено</button></td></tr>`).join(''):'<tr><td colspan="3" class="muted">Новых оплат нет</td></tr>';
+ $('#shopTbl').innerHTML=S.shop.map(it=>`<tr><td>${esc(it.t)}</td><td class="num">${fmt(it.p)}</td><td class="num">${it.orders}</td><td><button class="x" data-del="${it.id}" aria-label="Убрать ${esc(it.t)}">×</button></td></tr>`).join('');
+ $('#expTbl').innerHTML=S.expiring.map((e,i)=>{const r=e.kid?rem(S.kids[e.kid]):e.rem;return `<tr><td>${esc(e.who)}</td><td><span class="pill ${r<=1?'warn':'brass'} num">${r} зан.</span></td><td>${e.sent?'<span class="pill ok">Отправлено</span>':`<button class="btn ghost" style="padding:6px 10px;font-size:13px" data-remind="${i}">Напомнить</button>`}</td></tr>`}).join('');
+}
+function all(){renderParent();renderTeacher();renderAdmin()}
+
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-tab],[data-kid],[data-go],[data-bv],[data-ask],[data-buy],[data-cancel],[data-tariff],[data-paygo],[data-gwpay],[data-gwclose],[data-came],[data-skip],[data-undo],[data-del],[data-remind],[data-confirm]');
+ if(!t) return; const d=t.dataset;
+ if(d.tab){S.tab=d.tab;S.confirm=null;renderParent();$('#pScroll').scrollTop=0}
+ else if(d.kid){S.kid=d.kid;renderParent()}
+ else if(d.go){S.tab=d.go;renderParent();$('#pScroll').scrollTop=0}
+ else if(d.bv){S.bonusView=d.bv;renderParent()}
+ else if(d.ask){S.confirm=+d.ask;renderParent()}
+ else if('cancel' in d){S.confirm=null;renderParent()}
+ else if(d.buy){const it=S.shop.find(x=>x.id==d.buy); if(it&&S.bonus>=it.p){S.bonus-=it.p;it.orders++;S.history.unshift(['Обмен: '+it.t.toLowerCase(),'−'+it.p]);S.orders.unshift(it.t);S.confirm=null;all();toast('Заявка отправлена администратору')}}
+ else if(d.tariff){S.pay.tariff=+d.tariff;renderParent()}
+ else if('paygo' in d){S.pay.step='gw';renderGW()}
+ else if('gwpay' in d){
+  const tr=S.tariffs.find(x=>x[0]===S.pay.tariff); const k=K();
+  if(!k.pending){k.pending=true;S.pendingPay.unshift({who:k.full,kid:S.kid,n:tr[0],sum:tr[1],date:'сегодня'})}
+  S.pay.step='done'; all();
+ }
+ else if(d.confirm){const p=S.pendingPay[+d.confirm];if(p){if(p.kid){const k=S.kids[p.kid];k.total=rem(k)+p.n;k.used=0;k.until=k.name==='Маша'?'26 января':'2 февраля';k.pending=false}S.pendingPay.splice(+d.confirm,1);all();toast('Занятия добавлены, родитель получил уведомление')}}
+ else if('gwclose' in d){const wasDone=S.pay.step==='done';S.pay.step=null;if(wasDone)S.tab='home';renderParent()}
+ else if(d.came){const l=S.teacher[+d.came];l.st='came';if(l.kid){S.kids[l.kid].used++;S.bonus+=20;S.history.unshift(['Посещение урока','+20'])}else l.rem--;all();toast(l.kid?'Маше списано занятие, начислено 20 бонусов':'Отметка сохранена')}
+ else if(d.skip){const l=S.teacher[+d.skip];l.st='skip';all();toast('Родитель получил уведомление о пропуске')}
+ else if(d.undo){const l=S.teacher[+d.undo];if(l.st==='came'){if(l.kid){S.kids[l.kid].used--;S.bonus-=20;S.history.shift()}else l.rem++}l.st=null;all()}
+ else if(d.del){S.shop=S.shop.filter(x=>x.id!=d.del);all();toast('Товар убран из магазина')}
+ else if(d.remind){S.expiring[+d.remind].sent=true;renderAdmin();toast('Напоминание со ссылкой на оплату отправлено')}
+});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-demo]');if(!b)return;S.tab=b.dataset.demo;S.pay.step=null;renderParent();$('#pScroll').scrollTop=0;document.getElementById('parent').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})});
+document.addEventListener('keydown',e=>{const li=e.target.closest&&e.target.closest('#featList li');if(li&&(e.key==='Enter'||e.key===' ')){e.preventDefault();li.click()}});
+$('#addForm').addEventListener('submit',e=>{e.preventDefault();const n=$('#newName').value.trim(),p=parseInt($('#newPrice').value,10);if(!n||!p||p<1)return;S.shop.push({id:Date.now(),t:n,p,ic:'gift',orders:0});$('#newName').value='';$('#newPrice').value='';all();toast('Товар появился у родителей во вкладке «Бонусы»')});
+
+all();
+
+/* ---------------- Questionnaire ---------------- */
+const Q=[
+ {n:'Главное',why:'Начнём с целей: какие задачи школы приложение должно решить.',items:[
+  {id:'goal',l:'Зачем школе приложение? Что должно стать проще?',t:'area',h:'Например: меньше вопросов администратору «сколько осталось занятий», вовремя оплачивают абонементы, детям интереснее копить бонусы',wide:1},
+  {id:'correct',l:'Мы правильно поняли ваш запрос? Что добавить или поправить?',t:'area',wide:1},
+  {id:'first',l:'Что нужно в первую очередь?',t:'check',o:['Абонементы и остаток занятий','Оплата по ссылке','Бонусы','Магазин за бонусы','Расписание педагогов','Уведомления'],wide:1},
+  {id:'webok',l:'Подходит ли вам веб-приложение (без App Store и Google Play)?',t:'radio',o:['Да, подходит','Есть вопросы, обсудим'],wide:1},
+  {id:'budget',l:'Какой бюджет у школы на приложение?',t:'area',h:'Можно диапазон. Так мы предложим первую версию, которая в него уложится, а остальное добавим позже',wide:1,key:1}
+ ]},
+ {n:'Кто будет пользоваться',why:'',items:[
+  {id:'students',l:'Сколько у вас учеников?',t:'text',h:'Примерно, и сколько ожидаете через год'},
+  {id:'teachers',l:'Сколько педагогов и администраторов?',t:'text'},
+  {id:'roles',l:'Кто будет заходить в приложение?',t:'check',o:['Родители','Взрослые ученики','Подростки','Педагоги','Администратор','Руководитель'],wide:1}
+ ]},
+ {n:'Абонементы',why:'Чтобы родители видели остаток занятий и срок оплаты, а приложение считало всё само.',items:[
+  {id:'abshow',l:'Что родитель должен видеть по абонементу?',t:'check',o:['Сколько занятий осталось','До какого числа оплачен','Историю посещений','Пропуски и переносы','Историю оплат'],wide:1},
+  {id:'mark',l:'Кто будет отмечать, что занятие прошло?',t:'radio',o:['Педагог','Администратор','Пока не знаем']},
+  {id:'crm',l:'Где вы сейчас считаете занятия по абонементам?',t:'radio',o:['В CRM-программе','В таблице','В журнале','Другое'],h:'Если в программе, напишите её название ниже: приложение может брать данные оттуда'},
+  {id:'crmname',l:'Название программы (если есть)',t:'text'},
+  {id:'skip',l:'Как вы поступаете с пропусками и как это показывать родителям?',t:'area',h:'Например: по болезни переносим, без предупреждения списываем'}
+ ]},
+  {n:'Оплата',why:'Приложение только даёт ссылку на оплату. Деньги идут напрямую на счёт школы через её платёжный сервис, оплату в приложении подтверждает администратор.',items:[
+  {id:'acq',l:'Какой платёжный сервис вы используете или готовы подключить?',t:'radio',o:['Робокасса','ЮKassa','Т-Касса','Платёжные ссылки СБП банка','Пока ничего, подскажите'],h:'Через него родители будут платить по ссылке из приложения'},
+  {id:'paymethods',l:'Как родители будут переходить к оплате?',t:'check',o:['Кнопка «Оплатить» в приложении','Ссылка в напоминании','Наличными в школе, администратор отмечает оплату'],wide:1},
+  {id:'confirmwho',l:'Кто будет подтверждать оплаты в приложении?',t:'text',h:'Обычно администратор: несколько минут в день'},
+  {id:'remind',l:'Когда напоминать об оплате?',t:'check',o:['Когда осталось 1–2 занятия','За несколько дней до конца срока','В день окончания']}
+ ]},
+ {n:'Бонусы и магазин',why:'Перенесём вашу накопительную систему в приложение, чтобы она была наглядной.',items:[
+  {id:'bnow',l:'Расскажите, как сейчас устроены бонусы',t:'area',h:'Сколько дают за посещение, на что обмениваются, сгорают ли',wide:1},
+  {id:'bgoods',l:'Что будет в магазине за бонусы?',t:'area',h:'Значки, наклейки, тетради для нот, брелоки, мерч школы…'},
+  {id:'bwho',l:'Кто будет обновлять товары и выдавать их?',t:'text'},
+  {id:'bscope',l:'Бонусы копятся на ребёнка или на всю семью?',t:'radio',o:['На ребёнка','На семью']}
+ ]},
+ {n:'Расписание',why:'',items:[
+  {id:'sshow',l:'Что показывать в расписании?',t:'check',o:['Уроки ребёнка','В какие дни педагог в школе','Свободное время педагогов','Концерты и мероприятия'],wide:1},
+  {id:'sbook',l:'Нужна ли запись или перенос урока через приложение?',t:'radio',o:['Да, родитель сам','Да, заявкой администратору','Нет']},
+  {id:'schange',l:'Как часто меняется расписание?',t:'radio',o:['Редко, на весь год','Иногда','Часто']}
+ ]},
+ {n:'Уведомления и пожелания',why:'',items:[
+  {id:'nch',l:'Куда присылать уведомления?',t:'check',o:['В приложение','Telegram','MAX','Email']},
+  {id:'nwhat',l:'О чём уведомлять?',t:'check',o:['Заканчивается абонемент','Напоминание об уроке','Отмена или перенос','Начислены бонусы','Новости и концерты']},
+  {id:'extra',l:'Что ещё хотелось бы видеть в приложении?',t:'area',h:'Домашние задания, ноты, видео выступлений, чат с педагогом, отзывы… Пишите всё, даже если кажется лишним',wide:1}
+ ]},
+ {n:'Сроки и оформление',why:'',items:[
+  {id:'deadline',l:'Когда хотите запустить приложение?',t:'text'},
+  {id:'brand',l:'Есть ли логотип и фирменные цвета?',t:'radio',o:['Да','Есть логотип, цветов нет','Нет']}
+ ]}
+];
+const KEY='kamerton-form-v5';
+let draft={}; try{draft=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){draft={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(draft))}catch(e){}}
+const form=$('#qForm');
+form.innerHTML=Q.map((g,gi)=>`<fieldset class="qgroup" style="margin:0 0 16px;border:1px solid var(--line)"><header><span class="n">${String(gi+1).padStart(2,'0')}</span><h3>${g.n}</h3>${g.why?`<p class="why">${g.why}</p>`:''}</header><div class="qgrid">${g.items.map(q=>{
+ const v=draft[q.id];
+ let ctl='';
+ if(q.t==='text') ctl=`<input type="text" id="q_${q.id}" data-q="${q.id}" value="${esc(v||'')}">`;
+ else if(q.t==='area') ctl=`<textarea id="q_${q.id}" data-q="${q.id}">${esc(v||'')}</textarea>`;
+ else { const multi=q.t==='check'; const arr=multi?(Array.isArray(v)?v:[]):[v];
+  ctl=`<div class="opts" role="${multi?'group':'radiogroup'}" aria-labelledby="l_${q.id}">${q.o.map((o,oi)=>`<label><input type="${multi?'checkbox':'radio'}" id="q_${q.id}_${oi}" name="${q.id}" data-q="${q.id}" value="${esc(o)}" ${arr.includes(o)?'checked':''}>${esc(o)}</label>`).join('')}</div><textarea class="other" id="q_${q.id}_other" data-q="${q.id}" data-other="1" rows="2" placeholder="Ваш вариант, подробности или комментарий" aria-label="${esc(q.l)}: свой ответ">${esc(draft[q.id+'_other']||'')}</textarea>`;}
+ const lab=(q.t==='text'||q.t==='area')?`<label for="q_${q.id}" id="l_${q.id}">${q.l}</label>`:`<span class="lbl" id="l_${q.id}">${q.l}</span>`;
+ return `<div class="q ${q.wide?'wide':''} ${q.key?'key':''}">${lab}${q.h?`<span class="hint">${q.h}</span>`:''}${ctl}</div>`}).join('')}</div></fieldset>`).join('');
+const allQ=Q.flatMap(g=>g.items);
+function readQ(q){
+ if(q.t==='text'||q.t==='area') return ($('#q_'+q.id).value||'').trim();
+ const els=[...form.querySelectorAll(`input[name="${q.id}"]:checked`)].map(i=>i.value);
+ return q.t==='check'?els:(els[0]||'');
+}
+const otherOf=q=>{const el=document.getElementById('q_'+q.id+'_other');return el?el.value.trim():''};
+function prog(){const n=allQ.filter(q=>{const v=readQ(q);return (Array.isArray(v)?v.length:v)||otherOf(q)}).length;$('#progTxt').textContent=`Заполнено ${n} из ${allQ.length}`;$('#progBar').style.width=(n/allQ.length*100)+'%'}
+form.addEventListener('input',e=>{const id=e.target.dataset.q;if(!id)return;const q=allQ.find(x=>x.id===id);if(e.target.dataset.other)draft[id+'_other']=e.target.value;else draft[id]=readQ(q);save();prog()});
+form.addEventListener('submit',e=>e.preventDefault());
+function updMax(){try{$('#maxBtn').href='https://max.ru/:share?text='+encodeURIComponent(buildText(true))}catch(e){}}
+form.addEventListener('input',updMax);
+prog();
+setTimeout(updMax,0);
+function buildText(short){
+ let out='АНКЕТА: веб-приложение для музыкальной школы\n';
+ Q.forEach((g,gi)=>{let part='';g.items.forEach(q=>{const v=readQ(q);const t=Array.isArray(v)?v.join(', '):v;const o=otherOf(q);const ans=[t,o].filter(Boolean).join('. ');if(short&&!ans)return;part+=`— ${q.l}\n   ${ans||'(нет ответа)'}\n`});if(part)out+=`\n${gi+1}. ${g.n.toUpperCase()}\n`+part});
+ return out;
+}
+$('#copyBtn').addEventListener('click',()=>{
+ const txt=buildText();
+ const fallback=()=>{const w=$('#copyWrap');w.hidden=false;const ta=$('#copyOut');ta.value=txt;ta.focus();ta.select();toast('Выделите текст и скопируйте вручную')};
+ try{navigator.clipboard.writeText(txt).then(()=>toast('Ответы скопированы. Вставьте их в сообщение нам'),fallback)}catch(e){fallback()}
+});
+let clearArm=false,clearT;
+$('#clearBtn').addEventListener('click',e=>{
+ if(!clearArm){clearArm=true;e.target.textContent='Точно очистить?';clearT=setTimeout(()=>{clearArm=false;e.target.textContent='Очистить'},3000);return}
+ clearTimeout(clearT);clearArm=false;e.target.textContent='Очистить';draft={};save();form.querySelectorAll('input[type=text],textarea').forEach(i=>i.value='');form.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(i=>i.checked=false);prog();updMax();toast('Анкета очищена')
+});
+})();
+</script>
+
+</body>
+
+</html>
